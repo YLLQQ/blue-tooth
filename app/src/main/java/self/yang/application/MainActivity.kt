@@ -10,8 +10,6 @@ const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
 
 class MainActivity : AppCompatActivity() {
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
