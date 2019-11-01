@@ -4,4 +4,10 @@
     <string name="button_send">Send</string>
     <string name="button_open_buletooth">Open Bluetooth</string>
     <string name="button_close_buletooth">Close Bluetooth</string>
+
+    <string name="title_bluetooth">Bluetooth Message</string>
+    <string name="message_bluetooth_is_opened">Bluetooth is opened</string>
+    <string name="message_bluetooth_is_closed">Bluetooth is closed</string>
+
+
 </resources>
