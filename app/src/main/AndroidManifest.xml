@@ -2,9 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="self.yang.application">
 
-    <!--蓝牙权限-->
+    <!--使用蓝牙需要权限-->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--使用、扫描和设置需要权限-->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!--Android 6.0以上声明一下两个权限之一即可。声明位置权限，不然扫描或者发现蓝牙功能用不了哦-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!--静默开启蓝牙，追加权限-->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+
 
     <application
         android:allowBackup="true"

@@ -2,13 +2,16 @@ package self.yang.application
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
+
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
+const val REQUEST_ACCESS_COARSE_LOCATION_PERMISSION = 10
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,20 +21,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * 判断设备是否支持蓝牙
+     */
+    private fun isSupportBluetooth(): Boolean {
+        var bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+        if (bluetoothAdapter == null || !packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
+            showBluetoothDialog(getString(R.string.message_bluetooth_is_not_supported))
+
+            return false
+        }
+
+        return true
+    }
+
+    /**
      * 调用系统页面打开蓝牙
      */
     fun openBluetooth(view: View) {
+        var notSupportBluetooth = !isSupportBluetooth()
+
+        if (notSupportBluetooth) {
+            return
+        }
+
         var bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
-        var bluetoothIsOpen = bluetoothAdapter.isEnabled
+        var bluetoothIsOpened = bluetoothAdapter.isEnabled
 
-        if (bluetoothIsOpen) {
-            var alertDialog = AlertDialog.Builder(this)
-
-            alertDialog.setTitle(getString(R.string.title_bluetooth))
-            alertDialog.setMessage(getString(R.string.message_bluetooth_is_opened))
-
-            alertDialog.create().show()
+        if (bluetoothIsOpened) {
+            showBluetoothDialog(getString(R.string.message_bluetooth_is_opened))
 
             return
         }
@@ -43,24 +62,37 @@ class MainActivity : AppCompatActivity() {
      * 关闭蓝牙
      */
     fun closeBluetooth(view: View) {
+        var notSupportBluetooth = !isSupportBluetooth()
+
+        if (notSupportBluetooth) {
+            return
+        }
+
         var bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
-        var bluetoothIsOpen = bluetoothAdapter.isEnabled
+        var bluetoothIsOpened = bluetoothAdapter.isEnabled
 
-        if (bluetoothIsOpen) {
+        if (bluetoothIsOpened) {
             bluetoothAdapter.disable()
 
             return
         }
 
+        showBluetoothDialog(getString(R.string.message_bluetooth_is_closed))
+
+        return
+    }
+
+    /**
+     * 展示弹窗
+     */
+    private fun showBluetoothDialog(message: String) {
         var alertDialog = AlertDialog.Builder(this)
 
         alertDialog.setTitle(getString(R.string.title_bluetooth))
-        alertDialog.setMessage(getString(R.string.message_bluetooth_is_closed))
+        alertDialog.setMessage(message)
 
         alertDialog.create().show()
-
-        return
     }
 
     /**
