@@ -82,4 +82,15 @@
         android:text="GOTO SEND MAIL ACTIVITY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gotoExampleActivity" />
+
+    <Button
+        android:id="@+id/gotoContacts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:onClick="gotoContacts"
+        android:text="GOTO CONTACTS"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gotoSendMailActivity" />
 </androidx.constraintlayout.widget.ConstraintLayout>

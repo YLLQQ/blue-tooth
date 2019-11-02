@@ -5,16 +5,47 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
+
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
 const val USER_INPUT = "USER_INPUT"
 
 class MainActivity : AppCompatActivity() {
+
+	companion object {
+		internal const val PICK_CONTACT_REQUEST = 0
+		internal const val OPEN_BLUE_TOOTH = 1
+	}
+
+	/**
+	 *  有时，您会希望在 Activity 结束时从 Activity 中获取返回结果。
+	 *  例如，您可以启动一项 Activity，让用户在联系人列表中选择一个人；当 Activity 结束时，系统将返回用户选中的人。
+	 *  为此，请调用 startActivityForResult(Intent, int) 方法，其中整数参数会标识该调用。
+	 *  此标识符用于消除来自同一 Activity 的多次 startActivityForResult(Intent, int) 调用之间的歧义。
+	 *  这不是全局标识符，不存在与其他应用或 Activity 冲突的风险。结果通过 onActivityResult(int, int, Intent) 方法返回。
+	 *
+	 *  当子级 Activity 退出时，它可以调用 setResult(int) 将数据返回到其父级。
+	 *  子级 Activity 必须始终提供结果代码，该结果代码可以是标准结果 RESULT_CANCELED、RESULT_OK，也可以是从 RESULT_FIRST_USER 开始的任何自定义值。
+	 *  此外，子级 Activity 可以随意返回包含其所需的任何其他数据的 Intent 对象。
+	 *  父级 Activity 使用 onActivityResult(int, int, Intent) 方法，以及父级 Activity 最初提供的整数标识符来接收信息。
+	 *
+	 *  如果子级 Activity 由于任何原因（例如崩溃）失败，则父级 Activity 将收到代码为 RESULT_CANCELED 的结果。
+	 */
+	fun gotoContacts(view: View) {
+		var contactsIntent = Intent(Intent.ACTION_PICK)
+
+		contactsIntent.action = "android.intent.action.PICK"
+		contactsIntent.addCategory("android.intent.category.DEFAULT")
+		contactsIntent.type = "vnd.android.cursor.dir/phone_v2";
+
+		startActivityForResult(contactsIntent, PICK_CONTACT_REQUEST)
+	}
 
 	/**
 	 * 启动发送邮件的Activity
@@ -242,10 +273,39 @@ class MainActivity : AppCompatActivity() {
 	 */
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-		if (Activity.RESULT_CANCELED == resultCode) {
-			callToast("用户拒绝授权")
-		} else if (Activity.RESULT_OK == resultCode) {
-			callToast("用户授权成功")
+		when (requestCode) {
+			PICK_CONTACT_REQUEST -> if (resultCode == RESULT_OK) {
+				var contactData = data?.data
+
+				contactData?.let {
+					var cursor = contentResolver.query(
+						it, arrayOf("display_name", "data1"), null, null, null
+					)
+
+					if (cursor != null) {
+						while (cursor.moveToNext()) {
+							var contactName = cursor.getString(
+								cursor.getColumnIndex(
+									ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+								)
+							)
+							var phoneNumber = cursor.getString(
+								cursor.getColumnIndex(
+									ContactsContract.CommonDataKinds.Phone.NUMBER
+								)
+							)
+
+							callToast("$contactName / $phoneNumber")
+						}
+
+					}
+				}
+			}
+			OPEN_BLUE_TOOTH -> if (Activity.RESULT_CANCELED == resultCode) {
+				callToast("用户拒绝授权")
+			} else if (Activity.RESULT_OK == resultCode) {
+				callToast("用户授权成功")
+			}
 		}
 
 		super.onActivityResult(requestCode, resultCode, data)
@@ -273,7 +333,7 @@ class MainActivity : AppCompatActivity() {
 			return
 		}
 
-		startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 1)
+		startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), OPEN_BLUE_TOOTH)
 
 		setBluetoothCanDiscovered()
 	}
