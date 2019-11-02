@@ -12,8 +12,65 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
+const val USER_INPUT = "USER_INPUT"
 
 class MainActivity : AppCompatActivity() {
+
+	/**
+	 * 使用 onSaveInstanceState() 保存简单轻量的界面状态
+	 *
+	 * 当您的 Activity 开始停止时，系统会调用 onSaveInstanceState() 方法，以便您的 Activity 可以将状态信息保存到实例状态 Bundle 中。
+	 * 此方法的默认实现保存有关 Activity 视图层次结构状态的瞬态信息，例如 EditText 微件中的文本或 ListView 微件的滚动位置。
+	 *
+	 * 如要保存 Activity 的其他实例状态信息，您必须替换 onSaveInstanceState()，并将键值对添加到您的 Activity 意外销毁时所保存的 Bundle 对象中。
+	 * 替换 onSaveInstanceState() 时，如果您希望默认实现保存视图层次结构的状态，则必须调用父类实现。
+	 *
+	 * 请注意：当用户显式关闭 Activity 时，或者在其他情况下调用 finish() 时，系统不会调用 onSaveInstanceState()。
+	 *
+	 * 如要保存持久化数据（例如用户首选项或数据库中的数据），您应在 Activity 位于前台时抓住合适机会。
+	 * 如果没有这样的时机，您应在执行 onStop() 方法期间保存此类数据。
+	 *
+	 * 应始终调用 onRestoreInstanceState() 的父类实现，以便默认实现可以恢复视图层次结构的状态。
+	 */
+	override fun onSaveInstanceState(outState: Bundle) {
+		var editText = findViewById<EditText>(R.id.editText)
+
+		var userInputText = editText.text
+
+		Log.d("MainActivity", "user input text is $userInputText")
+
+		outState?.run {
+			Log.d("MainActivity", "outState store $userInputText")
+
+			putString(USER_INPUT, userInputText.toString())
+		}
+
+		// Always call the superclass so it can save the view hierarchy state
+		super.onSaveInstanceState(outState)
+	}
+
+	/**
+	 *  使用保存的实例状态恢复 Activity 界面状态
+	 *
+	 *  重建之前遭到销毁的 Activity 后，您可以从系统传递给 Activity 的 Bundle 中恢复保存的实例状态。
+	 *  onCreate() 和 onRestoreInstanceState() 回调方法均会收到包含实例状态信息的相同 Bundle。
+	 *
+	 *  因为无论系统是新建 Activity 实例还是重新创建之前的实例，都会调用 onCreate() 方法，所以在尝试读取之前，您必须检查状态 Bundle 是否为 null。
+	 *  如果为 null，系统将新建 Activity 实例，而不会恢复之前销毁的实例。
+	 *
+	 *  可以选择实现系统在 onStart() 方法之后调用的 onRestoreInstanceState()，而不是在 onCreate()期间恢复状态。
+	 *  仅当存在要恢复的已保存状态时，系统才会调用 onRestoreInstanceState()，因此您无需检查 Bundle 是否为 null：
+	 */
+	override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+		super.onRestoreInstanceState(savedInstanceState)
+
+		// Restore state members from saved instance
+		savedInstanceState?.run {
+			var userInputText = getString(USER_INPUT)
+
+			Log.d("MainActivity", "onRestoreInstanceState user before input text is $userInputText")
+		}
+	}
 
 	/**
 	 * create views and bind data to lists here
@@ -23,9 +80,23 @@ class MainActivity : AppCompatActivity() {
 	 * When onCreate() finishes, the next callback is always onStart().
 	 */
 	override fun onCreate(savedInstanceState: Bundle?) {
+		Log.d("MainActivity", "bundle is $savedInstanceState")
+
 		Log.d("MainActivity", "the activity is going to create")
 
+		// Always call the superclass first
 		super.onCreate(savedInstanceState)
+
+		// Check whether we're recreating a previously destroyed instance
+		if (null != savedInstanceState) {
+			with(savedInstanceState) {
+				var userInputText = savedInstanceState.getString(USER_INPUT)
+
+				Log.d("MainActivity", "onCreate user before input text is $userInputText")
+			}
+		}
+
+
 		setContentView(R.layout.activity_main)
 
 		Log.d("MainActivity", "the activity has created")
