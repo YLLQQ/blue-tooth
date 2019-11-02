@@ -17,6 +17,39 @@ const val USER_INPUT = "USER_INPUT"
 class MainActivity : AppCompatActivity() {
 
 	/**
+	 * 启动发送邮件的Activity
+	 *
+	 * 您的应用可能还希望使用 Activity 中的数据执行某些操作，例如发送电子邮件、短信或状态更新。
+	 * 在这种情况下，您的应用自身可能不具有执行此类操作所需的 Activity，因此您可以改为利用设备上其他应用提供的 Activity 为您执行这些操作。
+	 * 这便是 Intent 的真正价值所在：您可以创建一个 Intent，对您想要执行的操作进行描述，系统会从其他应用启动相应的 Activity。
+	 * 如果有多个 Activity 可以处理 Intent，则用户可以选择要使用哪一个。例如，如果您想允许用户发送电子邮件消息
+	 */
+	fun gotoSendMailActivity(view: View) {
+		var editText = findViewById<EditText>(R.id.editText)
+
+		var userInputText = editText.text
+
+		val intent = Intent(Intent.ACTION_SEND).apply {
+			type = "message/rfc822";
+
+			putExtra(Intent.EXTRA_EMAIL, arrayOf("ysh1059@163.com"))
+			putExtra(Intent.EXTRA_SUBJECT, "send email test");
+			putExtra(Intent.EXTRA_TEXT, userInputText);
+		}
+
+		startActivity(intent)
+	}
+
+	/**
+	 * 新启动的 Activity 不需要返回结果，则当前 Activity 可以通过调用 startActivity() 方法来启动它。
+	 */
+	fun gotoExampleActivity(view: View) {
+		val intent = Intent(this, ExampleActivity::class.java)
+
+		startActivity(intent)
+	}
+
+	/**
 	 * 使用 onSaveInstanceState() 保存简单轻量的界面状态
 	 *
 	 * 当您的 Activity 开始停止时，系统会调用 onSaveInstanceState() 方法，以便您的 Activity 可以将状态信息保存到实例状态 Bundle 中。
