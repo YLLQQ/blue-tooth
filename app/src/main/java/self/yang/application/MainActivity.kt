@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
-
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
 
 class MainActivity : AppCompatActivity() {
@@ -18,6 +17,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+    }
+
+    /**
+     * 设置蓝牙可以被其他设备搜索到
+     */
+    private fun setBluetoothCanDiscovered() {
+        var bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+        if (bluetoothAdapter.scanMode !== BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0)
+            startActivity(discoverableIntent)
+
+            callToast("设置蓝牙已可被其他设备搜索到")
+        }
     }
 
     /**
@@ -51,10 +65,14 @@ class MainActivity : AppCompatActivity() {
         if (bluetoothIsOpened) {
             callToast("蓝牙已打开")
 
+            setBluetoothCanDiscovered()
+
             return
         }
 
         startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 1)
+
+        setBluetoothCanDiscovered()
     }
 
     /**
