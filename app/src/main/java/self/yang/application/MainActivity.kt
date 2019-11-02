@@ -8,12 +8,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
-const val REQUEST_ACCESS_COARSE_LOCATION_PERMISSION = 10
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,28 +35,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 调用Toast打印提示信息
-     */
-    private fun callToast(message: String) {
-        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-    }
-
-    /**
-     * 判断设备是否支持蓝牙
-     */
-    private fun isSupportBluetooth(): Boolean {
-        var bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-
-        if (bluetoothAdapter == null || !packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
-            showBluetoothDialog(getString(R.string.message_bluetooth_is_not_supported))
-
-            return false
-        }
-
-        return true
-    }
-
-    /**
      * 调用系统页面打开蓝牙
      */
     fun openBluetooth(view: View) {
@@ -73,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         var bluetoothIsOpened = bluetoothAdapter.isEnabled
 
         if (bluetoothIsOpened) {
-            showBluetoothDialog(getString(R.string.message_bluetooth_is_opened))
+            callToast("蓝牙已打开")
 
             return
         }
@@ -101,21 +77,31 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        showBluetoothDialog(getString(R.string.message_bluetooth_is_closed))
+        callToast("蓝牙已关闭")
 
         return
     }
 
     /**
-     * 展示弹窗
+     * 判断设备是否支持蓝牙
      */
-    private fun showBluetoothDialog(message: String) {
-        var alertDialog = AlertDialog.Builder(this)
+    private fun isSupportBluetooth(): Boolean {
+        var bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
-        alertDialog.setTitle(getString(R.string.title_bluetooth))
-        alertDialog.setMessage(message)
+        if (bluetoothAdapter == null || !packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
+            callToast("当前设备不支持蓝牙")
 
-        alertDialog.create().show()
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * 调用Toast打印提示信息
+     */
+    private fun callToast(message: String) {
+        Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
     }
 
     /**
