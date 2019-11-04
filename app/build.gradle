@@ -41,4 +41,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.2.0'
     androidTestImplementation 'androidx.test.ext:truth:1.2.0'
     testImplementation 'org.robolectric:robolectric:4.2.1'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
 }

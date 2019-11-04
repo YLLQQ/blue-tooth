@@ -17,12 +17,15 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
 const val USER_INPUT = "USER_INPUT"
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     companion object {
         internal const val PICK_CONTACT_REQUEST = 0
@@ -40,7 +43,8 @@ class MainActivity : AppCompatActivity() {
         requestPermissions(
             arrayOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ), LOCATION_PERMISSION
         )
 
@@ -98,14 +102,10 @@ class MainActivity : AppCompatActivity() {
      */
     private val locationListener = object : LocationListener {
         override fun onProviderDisabled(provider: String?) {
-            callToast("GPS 已关闭")
-
             getLocation()
         }
 
         override fun onProviderEnabled(provider: String?) {
-            callToast("GPS 已打开")
-
             getLocation()
         }
 
@@ -268,6 +268,26 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "the activity has created")
 
         getLocation()
+
+        requestPermissions(
+            arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ), LOCATION_PERMISSION
+        )
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                var latitude = location?.latitude
+                var longitude = location?.longitude
+                var locationInfo = findViewById<TextView>(R.id.locationInfo)
+
+                locationInfo.text = "经度：$longitude / 纬度：$latitude"
+            }
+
     }
 
     /**
