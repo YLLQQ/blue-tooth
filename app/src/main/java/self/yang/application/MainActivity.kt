@@ -99,10 +99,14 @@ class MainActivity : AppCompatActivity() {
     private val locationListener = object : LocationListener {
         override fun onProviderDisabled(provider: String?) {
             callToast("GPS 已关闭")
+
+            getLocation()
         }
 
         override fun onProviderEnabled(provider: String?) {
             callToast("GPS 已打开")
+
+            getLocation()
         }
 
         override fun onLocationChanged(location: Location?) {
