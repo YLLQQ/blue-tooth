@@ -5,6 +5,7 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -17,8 +18,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
 
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
 const val USER_INPUT = "USER_INPUT"
@@ -31,7 +33,40 @@ class MainActivity : AppCompatActivity() {
         internal const val PICK_CONTACT_REQUEST = 0
         internal const val OPEN_BLUE_TOOTH = 1
         internal const val LOCATION_PERMISSION = 2
+        internal const val REQUEST_CHECK_SETTINGS = 3
     }
+
+    /**
+     * 设置位置请求
+     */
+    private fun setUpLocationSettings() {
+        // 获取当前位置设置
+        val builder = LocationSettingsRequest.Builder()
+
+        val client: SettingsClient = LocationServices.getSettingsClient(this)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
+
+        // 提示用户修改位置设置
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+            Log.d("Main Activity", "response is $locationSettingsResponse")
+        }.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+        }
+    }
+
 
     fun refreshGpsInfo(view: View) {
         getLocation()
@@ -262,20 +297,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         setContentView(R.layout.activity_main)
 
         Log.d("MainActivity", "the activity has created")
 
         getLocation()
 
-        requestPermissions(
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ), LOCATION_PERMISSION
-        )
+        setUpLocationSettings()
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
