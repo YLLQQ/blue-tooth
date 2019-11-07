@@ -17,8 +17,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
 
 const val EXTRA_MESSAGE = "self.yang.application.MESSAGE"
 const val USER_INPUT = "USER_INPUT"
@@ -31,7 +32,40 @@ class MainActivity : AppCompatActivity() {
         internal const val PICK_CONTACT_REQUEST = 0
         internal const val OPEN_BLUE_TOOTH = 1
         internal const val LOCATION_PERMISSION = 2
+        internal const val REQUEST_CHECK_SETTINGS = 3
     }
+
+    /**
+     * 设置位置请求
+     */
+    private fun setUpLocationSettings() {
+        // 获取当前位置设置
+        val builder = LocationSettingsRequest.Builder()
+
+        val client: SettingsClient = LocationServices.getSettingsClient(this)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
+
+        // 提示用户修改位置设置
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+            Log.d("Main Activity", "response is $locationSettingsResponse")
+        }.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+        }
+    }
+
 
     fun refreshGpsInfo(view: View) {
         getLocation()
@@ -246,6 +280,8 @@ class MainActivity : AppCompatActivity() {
      * When onCreate() finishes, the next callback is always onStart().
      */
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("MainActivity", "bundle is $savedInstanceState")
+
         Log.d("MainActivity", "the activity is going to create")
 
         // Always call the superclass first
@@ -267,8 +303,18 @@ class MainActivity : AppCompatActivity() {
 
         getLocation()
 
-        //  create an instance of the Fused Location Provider Client
+        setUpLocationSettings()
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                var latitude = location?.latitude
+                var longitude = location?.longitude
+                var locationInfo = findViewById<TextView>(R.id.locationInfo)
+
+                locationInfo.text = "经度：$longitude / 纬度：$latitude"
+            }
 
     }
 
