@@ -246,8 +246,6 @@ class MainActivity : AppCompatActivity() {
      * When onCreate() finishes, the next callback is always onStart().
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("MainActivity", "bundle is $savedInstanceState")
-
         Log.d("MainActivity", "the activity is going to create")
 
         // Always call the superclass first
@@ -269,24 +267,8 @@ class MainActivity : AppCompatActivity() {
 
         getLocation()
 
-        requestPermissions(
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ), LOCATION_PERMISSION
-        )
-
+        //  create an instance of the Fused Location Provider Client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                var latitude = location?.latitude
-                var longitude = location?.longitude
-                var locationInfo = findViewById<TextView>(R.id.locationInfo)
-
-                locationInfo.text = "经度：$longitude / 纬度：$latitude"
-            }
 
     }
 
@@ -312,6 +294,19 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "the activity's state is resume")
 
         super.onResume()
+
+        // Once you have created the Location Services client you can get the last known location of a user's device.
+        // When your app is connected to these you can use the fused location provider's getLastLocation() method to retrieve the device location.
+        // The precision of the location returned by this call is determined by the permission setting you put in your app manifest
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                var latitude = location?.latitude
+                var longitude = location?.longitude
+                var locationInfo1 = findViewById<TextView>(R.id.locationInfo1)
+
+                locationInfo1.text = "经度：$longitude / 纬度：$latitude"
+            }
     }
 
     /**
